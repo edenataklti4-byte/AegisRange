@@ -12,12 +12,22 @@ with open("detection/data/auth.log", "r") as log_file:
             events.append(event)
 
 
-print("Parsed SSH failed-login events:", len(events))
+failed_events = [
+    event for event in events
+    if event["event_type"] == "ssh_failed_login"
+]
 
+successful_events = [
+    event for event in events
+    if event["event_type"] == "ssh_successful_login"
+]
+
+print("Total parsed SSH events:", len(events))
+print("Failed logins:", len(failed_events))
+print("Successful logins:", len(successful_events))
 alerts = detect_ssh_bruteforce(events)
 
 print("Alerts detected:")
 
 for alert in alerts:
     print(alert)
-
