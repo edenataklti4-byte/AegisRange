@@ -1,3 +1,4 @@
+
 from detection.parsers.ssh_parser import parse_ssh_log
 
 
@@ -16,12 +17,35 @@ successful_login = (
 )
 
 
-failed_event = parse_ssh_log(failed_login)
-successful_event = parse_ssh_log(successful_login)
+def test_failed_login():
+    event = parse_ssh_log(failed_login)
+
+    assert event is not None
+    assert event["event_type"] == "ssh_failed_login"
+    assert event["username"] == "user1"
+    assert event["source_ip"] == "172.16.134.1"
+    assert event["source_port"] == 35376
 
 
-print("Failed login event:")
-print(failed_event)
+def test_successful_login():
+    event = parse_ssh_log(successful_login)
 
-print("\nSuccessful login event:")
-print(successful_event)
+    assert event is not None
+    assert event["event_type"] == "ssh_successful_login"
+    assert event["username"] == "bupuser"
+    assert event["source_ip"] == "172.16.134.1"
+    assert event["source_port"] == 58928
+
+
+def test_unrecognized_line():
+    event = parse_ssh_log("This is not an SSH authentication log")
+
+    assert event is None
+
+
+if __name__ == "__main__":
+    test_failed_login()
+    test_successful_login()
+    test_unrecognized_line()
+    print("All SSH parser tests passed.")
+

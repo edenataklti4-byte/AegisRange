@@ -1,33 +1,44 @@
+
 from detection.parsers.ssh_parser import parse_ssh_log
 from detection.rules.ssh_bruteforce import detect_ssh_bruteforce
+from detection.rules.ssh_compromise import detect_success_after_failures
 
 
-events = []
+def run_detection(log_path="detection/data/auth.log"):
+    events = []
 
-with open("detection/data/auth.log", "r") as log_file:
-    for line in log_file:
-        event = parse_ssh_log(line)
+    with open(log_path, "r") as log_file:
+        for line in log_file:
+            event = parse_ssh_log(line)
 
-        if event:
-            events.append(event)
+            if event:
+                events.append(event)
+
+    brute_force_alerts = detect_ssh_bruteforce(events)
+    compromise_alerts = detect_success_after_failures(events)
+
+    return {
+        "total_events": len(events),
+        "failed_logins": sum(
+            event["event_type"] == "ssh_failed_login"
+            for event in events
+        ),
+        "successful_logins": sum(
+            event["event_type"] == "ssh_successful_login"
+            for event in events
+        ),
+        "alerts": brute_force_alerts + compromise_alerts,
+    }
 
 
-failed_events = [
-    event for event in events
-    if event["event_type"] == "ssh_failed_login"
-]
+if __name__ == "__main__":
+    results = run_detection()
 
-successful_events = [
-    event for event in events
-    if event["event_type"] == "ssh_successful_login"
-]
+    print("Total parsed SSH events:", results["total_events"])
+    print("Failed logins:", results["failed_logins"])
+    print("Successful logins:", results["successful_logins"])
+    print("Total alerts:", len(results["alerts"]))
 
-print("Total parsed SSH events:", len(events))
-print("Failed logins:", len(failed_events))
-print("Successful logins:", len(successful_events))
-alerts = detect_ssh_bruteforce(events)
+    for alert in results["alerts"]:
+        print(alert)
 
-print("Alerts detected:")
-
-for alert in alerts:
-    print(alert)
