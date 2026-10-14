@@ -1,0 +1,59 @@
+10/12/2026 9:42:40 PM  11 File created:
+UtcTime: 2026-10-12 18:42:40.320
+ProcessGuid: {22252613-e353-6ac8-3d01-000000000800}
+ProcessId: 1484
+Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+TargetFilename: C:\Users\ciel\AppData\Local\Temp\update_service.bat
+User: DESKTOP-HFJ597U\ciel
+
+10/12/2026 9:42:40 PM  1 Process Create:
+UtcTime: 2026-10-12 18:42:40.416
+ProcessGuid: {22252613-2a20-6acd-1b06-000000000800}
+ProcessId: 11508
+Image: C:\Windows\System32\cmd.exe
+CommandLine: C:\WINDOWS\system32\cmd.exe /c ""C:\Users\ciel\AppData\Local\Temp\update_service.bat" "
+ParentImage: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+User: DESKTOP-HFJ597U\ciel
+
+10/12/2026 9:42:40 PM  1 Process Create:
+UtcTime: 2026-10-12 18:42:40.664
+ProcessGuid: {22252613-2a20-6acd-1d06-000000000800}
+ProcessId: 6680
+Image: C:\Windows\System32\whoami.exe
+CommandLine: whoami
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: C:\WINDOWS\system32\cmd.exe /c ""C:\Users\ciel\AppData\Local\Temp\update_service.bat" "
+User: DESKTOP-HFJ597U\ciel
+
+10/12/2026 9:42:40 PM  1 Process Create:
+UtcTime: 2026-10-12 18:42:40.738
+ProcessGuid: {22252613-2a20-6acd-1e06-000000000800}
+ProcessId: 12112
+Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+CommandLine: powershell -c 'Test-NetConnection -ComputerName 172.16.134.1 -Port 4444"
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: C:\WINDOWS\system32\cmd.exe /c ""C:\Users\ciel\AppData\Local\Temp\update_service.bat" "
+User: DESKTOP-HFJ597U\ciel
+
+10/12/2026 9:42:42 PM  1 Process Create:
+UtcTime: 2026-10-12 18:42:42.116
+ProcessGuid: {22252613-2a22-6acd-2106-000000000800}
+ProcessId: 7468
+Image: C:\Windows\System32\timeout.exe
+CommandLine: timeout /t 5
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: C:\WINDOWS\system32\cmd.exe /c ""C:\Users\ciel\AppData\Local\Temp\update_service.bat" "
+User: DESKTOP-HFJ597U\ciel
+
+10/12/2026 10:28:28 PM  3 Network connection detected:
+UtcTime: 2026-10-09 22:59:46.409
+ProcessGuid: {22252613-e32e-6ac8-3201-000000000800}
+ProcessId: 4600
+Image: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe
+Protocol: tcp
+Initiated: true
+SourceIp: 172.16.134.128
+SourcePort: 64337
+DestinationIp: 172.16.134.1
+DestinationPort: 4444
+User: DESKTOP-HFJ597U\ciel
