@@ -1,4 +1,4 @@
-
+from detection.utils.alert_formatter import format_alert
 from detection.parsers.ssh_parser import parse_ssh_log
 from detection.rules.ssh_bruteforce import detect_ssh_bruteforce
 from detection.rules.ssh_compromise import detect_success_after_failures
@@ -40,5 +40,4 @@ if __name__ == "__main__":
     print("Total alerts:", len(results["alerts"]))
 
     for alert in results["alerts"]:
-        print(alert)
-
+    	print(format_alert(alert))
