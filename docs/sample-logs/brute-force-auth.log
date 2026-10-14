@@ -1,0 +1,42 @@
+
+2026-09-21T09:23:22.819489+00:00 linux sshd-session[2827]: Disconnecting invalid user user1 172.16.134.1 port 45014: Too many authentication failures [preauth]
+2026-09-21T09:23:22.819553+00:00 linux sshd-session[2827]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=172.16.134.1 
+2026-09-21T09:23:22.819618+00:00 linux sshd-session[2827]: PAM service(sshd) ignoring max retries; 6 > 3
+2026-09-21T09:23:22.885380+00:00 linux sshd-session[2829]: Invalid user user1 from 172.16.134.1 port 35376
+2026-09-21T09:23:22.890933+00:00 linux sshd-session[2829]: pam_unix(sshd:auth): check pass; user unknown
+2026-09-21T09:23:22.891137+00:00 linux sshd-session[2829]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=172.16.134.1 
+2026-09-21T09:23:24.869930+00:00 linux sshd-session[2829]: Failed password for invalid user user1 from 172.16.134.1 port 35376 ssh2
+2026-09-21T09:23:26.434465+00:00 linux sshd-session[2829]: pam_unix(sshd:auth): check pass; user unknown
+2026-09-21T09:23:28.512701+00:00 linux sshd-session[2829]: Failed password for invalid user user1 from 172.16.134.1 port 35376 ssh2
+2026-09-21T09:23:29.978144+00:00 linux sshd-session[2829]: pam_unix(sshd:auth): check pass; user unknown
+2026-09-21T09:23:31.577275+00:00 linux sshd-session[2829]: Failed password for invalid user user1 from 172.16.134.1 port 35376 ssh2
+2026-09-21T09:23:31.751013+00:00 linux sshd-session[2829]: pam_unix(sshd:auth): check pass; user unknown
+2026-09-21T09:23:33.779354+00:00 linux sshd-session[2829]: Failed password for invalid user user1 from 172.16.134.1 port 35376 ssh2
+2026-09-21T09:23:35.296122+00:00 linux sshd-session[2829]: pam_unix(sshd:auth): check pass; user unknown
+2026-09-21T09:23:36.739558+00:00 linux sshd-session[2829]: Failed password for invalid user user1 from 172.16.134.1 port 35376 ssh2
+2026-09-21T09:23:37.069433+00:00 linux sshd-session[2829]: pam_unix(sshd:auth): check pass; user unknown
+2026-09-21T09:23:39.056311+00:00 linux sshd-session[2829]: Failed password for invalid user user1 from 172.16.134.1 port 35376 ssh2
+2026-09-21T09:23:40.613775+00:00 linux sshd-session[2829]: error: maximum authentication attempts exceeded for invalid user user1 from 172.16.134.1 port 35376 ssh2 [preauth]
+2026-09-21T09:23:40.614108+00:00 linux sshd-session[2829]: Disconnecting invalid user user1 172.16.134.1 port 35376: Too many authentication failures [preauth]
+2026-09-21T09:23:40.615233+00:00 linux sshd-session[2829]: PAM 5 more authentication failures; logname= uid=0 euid=0 tty=ssh ruser= rhost=172.16.134.1 
+2026-09-21T09:23:40.615337+00:00 linux sshd-session[2829]: PAM service(sshd) ignoring max retries; 6 > 3
+2026-09-21T09:23:40.680097+00:00 linux sshd-session[2831]: Invalid user user1 from 172.16.134.1 port 44158
+2026-09-21T09:23:40.685447+00:00 linux sshd-session[2831]: pam_unix(sshd:auth): check pass; user unknown
+2026-09-21T09:23:40.685559+00:00 linux sshd-session[2831]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=172.16.134.1 
+2026-09-21T09:23:42.565539+00:00 linux sshd-session[2831]: Failed password for invalid user user1 from 172.16.134.1 port 44158 ssh2
+2026-09-21T09:23:44.227182+00:00 linux sshd-session[2831]: Received disconnect from 172.16.134.1 port 44158:11: Bye Bye [preauth]
+2026-09-21T09:23:44.227507+00:00 linux sshd-session[2831]: Disconnected from invalid user user1 172.16.134.1 port 44158 [preauth]
+2026-09-21T09:23:44.374968+00:00 linux sshd-session[2833]: Accepted password for bupuser from 172.16.134.1 port 58928 ssh2
+2026-09-21T09:23:44.376109+00:00 linux sshd-session[2833]: pam_unix(sshd:session): session opened for user bupuser(uid=1002) by bupuser(uid=0)
+2026-09-21T09:23:44.385912+00:00 linux systemd-logind[1224]: New session '8' of user 'bupuser' with class 'user' and type 'tty'.
+2026-09-21T09:23:44.443688+00:00 linux (systemd): pam_unix(systemd-user:session): session opened for user bupuser(uid=1002) by bupuser(uid=0)
+2026-09-21T09:23:44.445219+00:00 linux systemd-logind[1224]: New session '9' of user 'bupuser' with class 'manager' and type 'unspecified'.
+2026-09-21T09:23:44.868635+00:00 linux sshd-session[2913]: Connection closed by 172.16.134.1 port 58928
+2026-09-21T09:23:44.868995+00:00 linux sshd-session[2833]: pam_unix(sshd:session): session closed for user bupuser
+2026-09-21T09:23:44.872620+00:00 linux systemd-logind[1224]: Session 8 logged out. Waiting for processes to exit.
+2026-09-21T09:23:44.873572+00:00 linux systemd-logind[1224]: Removed session 8.
+2026-09-21T09:23:55.023949+00:00 linux (sd-pam): pam_unix(systemd-user:session): session closed for user bupuser
+2026-09-21T09:23:55.024446+00:00 linux systemd-logind[1224]: Removed session 9.
+2026-09-21T09:25:08.368454+00:00 linux sudo: pam_unix(sudo:session): session opened for user root(uid=0) by ciel(uid=1000)
+2026-09-21T09:25:08.369543+00:00 linux sudo: ciel : TTY=/dev/pts/0 ; PWD=/home/ciel ; USER=root ; COMMAND=/usr/bin/tail -40 /var/log/auth.log
+
