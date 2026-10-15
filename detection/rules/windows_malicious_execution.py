@@ -1,3 +1,4 @@
+
 from datetime import datetime
 
 
@@ -18,8 +19,9 @@ def _normalize_path(value):
 
 
 def detect_malicious_file_execution(events, window_seconds=10):
-    """Detect a temporary batch file created and then launched by cmd.exe."""
+    """Detect a temporary batch file created by PowerShell and launched by cmd.exe."""
     alerts = []
+    seen_executions = set()
 
     file_events = [
         event for event in events
@@ -64,7 +66,7 @@ def detect_malicious_file_execution(events, window_seconds=10):
 
             elapsed = (process_time - file_time).total_seconds()
 
-            if elapsed < 0 or elapsed > window_seconds:
+            if not 0 <= elapsed <= window_seconds:
                 continue
 
             if not parent_image.endswith("\\powershell.exe"):
@@ -79,6 +81,17 @@ def detect_malicious_file_execution(events, window_seconds=10):
             if file_user and process_user and file_user != process_user:
                 continue
 
+            process_guid = process_fields.get("ProcessGuid")
+
+            execution_key = (
+                normalized_target,
+                process_guid or process_event.get("timestamp"),
+            )
+
+            if execution_key in seen_executions:
+                continue
+
+            seen_executions.add(execution_key)
             child_processes = []
 
             for child_event in process_events:
@@ -87,23 +100,43 @@ def detect_malicious_file_execution(events, window_seconds=10):
                 child_image = _normalize_path(
                     child_fields.get("Image", "")
                 )
-                child_parent = _normalize_path(
+
+                if not child_time or not child_image:
+                    continue
+
+                child_elapsed = (
+                    child_time - process_time
+                ).total_seconds()
+
+                if not 0 <= child_elapsed <= window_seconds:
+                    continue
+
+                child_parent_guid = child_fields.get("ParentProcessGuid")
+                child_parent_image = _normalize_path(
                     child_fields.get("ParentImage", "")
                 )
 
-                if not child_time:
-                    continue
+                # Use process GUIDs when both are present.
+                if process_guid and child_parent_guid:
+                    if child_parent_guid != process_guid:
+                        continue
+                else:
+                    # Fallback for logs that don't include GUIDs.
+                    if not child_parent_image.endswith("\\cmd.exe"):
+                        continue
 
-                child_elapsed = (child_time - process_time).total_seconds()
+                child_user = child_fields.get("User")
 
                 if (
-                    0 <= child_elapsed <= window_seconds
-                    and child_parent.endswith("\\cmd.exe")
-                    and child_image
+                    process_user
+                    and child_user
+                    and process_user != child_user
                 ):
-                    child_processes.append(
-                        child_fields.get("Image", "")
-                    )
+                    continue
+
+                child_processes.append(
+                    child_fields.get("Image", "")
+                )
 
             alerts.append({
                 "alert_type": "windows_malicious_file_execution",

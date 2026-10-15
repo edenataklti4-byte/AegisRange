@@ -1,3 +1,4 @@
+
 from detection.rules.windows_malicious_execution import (
     detect_malicious_file_execution,
 )
@@ -7,8 +8,12 @@ FILE_EVENT = {
     "event_id": 11,
     "timestamp": "2026-10-12T18:42:40.320000",
     "fields": {
-        "Image": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
-        "TargetFilename": r"C:\Users\ciel\AppData\Local\Temp\update_service.bat",
+        "Image": (
+            r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+        ),
+        "TargetFilename": (
+            r"C:\Users\ciel\AppData\Local\Temp\update_service.bat"
+        ),
         "User": r"DESKTOP-HFJ597U\ciel",
     },
 }
@@ -18,8 +23,14 @@ CMD_EVENT = {
     "timestamp": "2026-10-12T18:42:40.416000",
     "fields": {
         "Image": r"C:\Windows\System32\cmd.exe",
-        "CommandLine": r'cmd.exe /c "C:\Users\ciel\AppData\Local\Temp\update_service.bat"',
-        "ParentImage": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
+        "CommandLine": (
+            r'cmd.exe /c "C:\Users\ciel\AppData\Local\Temp\update_service.bat"'
+        ),
+        "ParentImage": (
+            r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe"
+        ),
+        "ProcessGuid": "{CMD-GUID}",
+        "ParentProcessGuid": "{POWERSHELL-GUID}",
         "User": r"DESKTOP-HFJ597U\ciel",
     },
 }
@@ -30,6 +41,20 @@ WHOAMI_EVENT = {
     "fields": {
         "Image": r"C:\Windows\System32\whoami.exe",
         "ParentImage": r"C:\Windows\System32\cmd.exe",
+        "ProcessGuid": "{WHOAMI-GUID}",
+        "ParentProcessGuid": "{CMD-GUID}",
+        "User": r"DESKTOP-HFJ597U\ciel",
+    },
+}
+
+UNRELATED_CHILD_EVENT = {
+    "event_id": 1,
+    "timestamp": "2026-10-12T18:42:40.700000",
+    "fields": {
+        "Image": r"C:\Windows\System32\notepad.exe",
+        "ParentImage": r"C:\Windows\System32\cmd.exe",
+        "ProcessGuid": "{NOTEPAD-GUID}",
+        "ParentProcessGuid": "{OTHER-CMD-GUID}",
         "User": r"DESKTOP-HFJ597U\ciel",
     },
 }
@@ -61,7 +86,9 @@ def test_ignores_batch_file_outside_temp_directory():
         **FILE_EVENT,
         "fields": {
             **FILE_EVENT["fields"],
-            "TargetFilename": r"C:\Users\ciel\Documents\update_service.bat",
+            "TargetFilename": (
+                r"C:\Users\ciel\Documents\update_service.bat"
+            ),
         },
     }
 
@@ -81,9 +108,34 @@ def test_ignores_execution_before_file_creation():
     assert alerts == []
 
 
+def test_ignores_child_process_from_unrelated_command():
+    alerts = detect_malicious_file_execution(
+        [
+            FILE_EVENT,
+            CMD_EVENT,
+            WHOAMI_EVENT,
+            UNRELATED_CHILD_EVENT,
+        ]
+    )
+
+    assert len(alerts) == 1
+
+    assert any(
+        image.endswith("whoami.exe")
+        for image in alerts[0]["child_processes"]
+    )
+
+    assert not any(
+        image.endswith("notepad.exe")
+        for image in alerts[0]["child_processes"]
+    )
+
+
 if __name__ == "__main__":
     test_detects_temporary_batch_file_execution()
     test_ignores_file_without_matching_execution()
     test_ignores_batch_file_outside_temp_directory()
     test_ignores_execution_before_file_creation()
+    test_ignores_child_process_from_unrelated_command()
+
     print("All Windows malicious execution tests passed.")
