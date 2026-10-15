@@ -1,6 +1,6 @@
 
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 EVENT_HEADER_PATTERN = re.compile(
@@ -56,9 +56,14 @@ def parse_sysmon_event(block):
 
     if utc_time:
         try:
-            event["timestamp"] = datetime.fromisoformat(
-                utc_time
-            ).isoformat()
+            parsed_time = datetime.fromisoformat(utc_time)
+
+            if parsed_time.tzinfo is None:
+                parsed_time = parsed_time.replace(tzinfo=timezone.utc)
+            else:
+                parsed_time = parsed_time.astimezone(timezone.utc)
+
+            event["timestamp"] = parsed_time.isoformat()
         except ValueError:
             event["timestamp"] = None
     else:

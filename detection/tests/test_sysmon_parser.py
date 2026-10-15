@@ -1,4 +1,4 @@
-
+from datetime import datetime, timezone
 from detection.parsers.sysmon_parser import (
     parse_sysmon_event,
     parse_sysmon_log,
@@ -78,6 +78,40 @@ def test_ignores_unrecognized_text():
     assert parse_sysmon_event("This is not a Sysmon event") is None
 
 
+def test_utc_timestamp_is_timezone_aware():
+    event = parse_sysmon_event(FILE_EVENT)
+
+    assert event is not None
+    timestamp = datetime.fromisoformat(event["timestamp"])
+
+    assert timestamp.tzinfo is not None
+    assert timestamp.utcoffset().total_seconds() == 0
+
+
+def test_explicit_offset_is_normalized_to_utc():
+    event_text = FILE_EVENT.replace(
+        "2026-10-12 18:42:40.320",
+        "2026-10-12T20:42:40.320+02:00",
+    )
+
+    event = parse_sysmon_event(event_text)
+
+    assert event is not None
+    assert event["timestamp"] == "2026-10-12T18:42:40.320000+00:00"
+
+
+def test_malformed_utc_timestamp_becomes_none():
+    event_text = FILE_EVENT.replace(
+        "2026-10-12 18:42:40.320",
+        "not-a-valid-timestamp",
+    )
+
+    event = parse_sysmon_event(event_text)
+
+    assert event is not None
+    assert event["timestamp"] is None
+
+
 if __name__ == "__main__":
     test_parses_file_event()
     test_parses_process_event()
@@ -85,3 +119,7 @@ if __name__ == "__main__":
     test_parses_multiple_events()
     test_ignores_unrecognized_text()
     print("All Sysmon parser tests passed.")
+
+    test_utc_timestamp_is_timezone_aware()
+    test_explicit_offset_is_normalized_to_utc()
+    test_malformed_utc_timestamp_becomes_none()
