@@ -206,6 +206,31 @@ def test_handles_mixed_timezone_formats():
         for image in alerts[0]["child_processes"]
     )
 
+def test_handles_missing_process_guids():
+    cmd_without_guids = {
+        **CMD_EVENT,
+        "fields": {
+            key: value
+            for key, value in CMD_EVENT["fields"].items()
+            if key not in ("ProcessGuid", "ParentProcessGuid")
+        },
+    }
+
+    child_without_guids = {
+        **WHOAMI_EVENT,
+        "fields": {
+            key: value
+            for key, value in WHOAMI_EVENT["fields"].items()
+            if key not in ("ProcessGuid", "ParentProcessGuid")
+        },
+    }
+
+    alerts = detect_malicious_file_execution(
+        [FILE_EVENT, cmd_without_guids, child_without_guids]
+    )
+
+    assert len(alerts) == 1
+    assert alerts[0]["child_processes"] == []
 
 if __name__ == "__main__":
     test_detects_temporary_batch_file_execution()
@@ -218,5 +243,6 @@ if __name__ == "__main__":
     test_handles_mixed_timezone_formats()
     test_ignores_missing_process_fields()
     test_ignores_execution_outside_time_window()
+    test_handles_missing_process_guids()
 
     print("All Windows malicious execution tests passed.")

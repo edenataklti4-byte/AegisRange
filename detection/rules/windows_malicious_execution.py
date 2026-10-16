@@ -119,18 +119,14 @@ def detect_malicious_file_execution(events, window_seconds=10):
                     continue
 
                 child_parent_guid = child_fields.get("ParentProcessGuid")
-                child_parent_image = _normalize_path(
-                    child_fields.get("ParentImage", "")
-                )
 
-                # Use process GUIDs when both are present.
-                if process_guid and child_parent_guid:
-                    if child_parent_guid != process_guid:
-                        continue
-                else:
-                    # Fallback for logs that don't include GUIDs.
-                    if not child_parent_image.endswith("\\cmd.exe"):
-                        continue
+                # Only associate a child when its parent GUID matches
+                # the detected cmd.exe process.
+                if not process_guid or not child_parent_guid:
+                    continue
+
+                if child_parent_guid != process_guid:
+                    continue
 
                 child_user = child_fields.get("User")
 
