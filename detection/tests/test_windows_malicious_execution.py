@@ -183,6 +183,30 @@ def test_ignores_execution_outside_time_window():
 
     assert alerts == []
 
+
+def test_handles_mixed_timezone_formats():
+    utc_file_event = {
+        **FILE_EVENT,
+        "timestamp": "2026-10-12T18:42:40.320000+00:00",
+    }
+
+    offset_cmd_event = {
+        **CMD_EVENT,
+        "timestamp": "2026-10-12T20:42:40.416000+02:00",
+    }
+
+    alerts = detect_malicious_file_execution(
+        [utc_file_event, offset_cmd_event, WHOAMI_EVENT]
+    )
+
+    assert len(alerts) == 1
+    assert alerts[0]["alert_type"] == "windows_malicious_file_execution"
+    assert any(
+        image.endswith("whoami.exe")
+        for image in alerts[0]["child_processes"]
+    )
+
+
 if __name__ == "__main__":
     test_detects_temporary_batch_file_execution()
     test_ignores_file_without_matching_execution()
@@ -191,6 +215,7 @@ if __name__ == "__main__":
     test_ignores_child_process_from_unrelated_command()
     test_ignores_malformed_timestamp()
     test_ignores_missing_file_fields()
+    test_handles_mixed_timezone_formats()
     test_ignores_missing_process_fields()
     test_ignores_execution_outside_time_window()
 

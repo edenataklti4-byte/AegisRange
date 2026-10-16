@@ -1,5 +1,4 @@
-
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 def _parse_timestamp(event):
@@ -9,7 +8,15 @@ def _parse_timestamp(event):
         return None
 
     try:
-        return datetime.fromisoformat(timestamp)
+        parsed = datetime.fromisoformat(timestamp)
+
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        else:
+            parsed = parsed.astimezone(timezone.utc)
+
+        return parsed
+
     except (TypeError, ValueError):
         return None
 
