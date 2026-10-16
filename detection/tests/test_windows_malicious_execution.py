@@ -130,6 +130,58 @@ def test_ignores_child_process_from_unrelated_command():
         for image in alerts[0]["child_processes"]
     )
 
+def test_ignores_malformed_timestamp():
+    bad_file_event = {
+        **FILE_EVENT,
+        "timestamp": "not-a-valid-timestamp",
+    }
+
+    alerts = detect_malicious_file_execution(
+        [bad_file_event, CMD_EVENT]
+    )
+
+    assert alerts == []
+
+
+def test_ignores_missing_file_fields():
+    incomplete_file_event = {
+        "event_id": 11,
+        "timestamp": "2026-10-12T18:42:40.320000",
+        "fields": {},
+    }
+
+    alerts = detect_malicious_file_execution(
+        [incomplete_file_event, CMD_EVENT]
+    )
+
+    assert alerts == []
+
+
+def test_ignores_missing_process_fields():
+    incomplete_process_event = {
+        "event_id": 1,
+        "timestamp": "2026-10-12T18:42:40.416000",
+        "fields": {},
+    }
+
+    alerts = detect_malicious_file_execution(
+        [FILE_EVENT, incomplete_process_event]
+    )
+
+    assert alerts == []
+
+
+def test_ignores_execution_outside_time_window():
+    late_cmd = {
+        **CMD_EVENT,
+        "timestamp": "2026-10-12T18:43:00.000000",
+    }
+
+    alerts = detect_malicious_file_execution(
+        [FILE_EVENT, late_cmd]
+    )
+
+    assert alerts == []
 
 if __name__ == "__main__":
     test_detects_temporary_batch_file_execution()
@@ -137,5 +189,9 @@ if __name__ == "__main__":
     test_ignores_batch_file_outside_temp_directory()
     test_ignores_execution_before_file_creation()
     test_ignores_child_process_from_unrelated_command()
+    test_ignores_malformed_timestamp()
+    test_ignores_missing_file_fields()
+    test_ignores_missing_process_fields()
+    test_ignores_execution_outside_time_window()
 
     print("All Windows malicious execution tests passed.")
