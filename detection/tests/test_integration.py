@@ -17,6 +17,9 @@ def run_detection(log_path="detection/data/auth.log"):
     brute_force_alerts = detect_ssh_bruteforce(events)
     compromise_alerts = detect_success_after_failures(events)
 
+    alerts = brute_force_alerts + compromise_alerts
+    formatted_alerts = [format_alert(alert) for alert in alerts]
+
     return {
         "total_events": len(events),
         "failed_logins": sum(
@@ -27,9 +30,8 @@ def run_detection(log_path="detection/data/auth.log"):
             event["event_type"] == "ssh_successful_login"
             for event in events
         ),
-        "alerts": brute_force_alerts + compromise_alerts,
+        "alerts": formatted_alerts,
     }
-
 
 if __name__ == "__main__":
     results = run_detection()
@@ -40,4 +42,4 @@ if __name__ == "__main__":
     print("Total alerts:", len(results["alerts"]))
 
     for alert in results["alerts"]:
-    	print(format_alert(alert))
+        print(alert)
