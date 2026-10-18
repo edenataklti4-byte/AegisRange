@@ -12,3 +12,24 @@ class RawLog(Base):
     raw_data = Column(JSON, nullable=False)
     processed = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+class Incident(Base):
+    __tablename__ = "incidents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    severity = Column(String, nullable=False, default="low")
+    status = Column(String, nullable=False, default="open")
+    source_ip = Column(String, nullable=False, index=True)
+    log_count = Column(Integer, nullable=False, default=0)
+    created_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False
+    )
+    updated_at = Column(
+        DateTime(timezone=True),
+        onupdate=func.now(),
+        nullable=True
+    )
