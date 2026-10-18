@@ -7,10 +7,9 @@ from datetime import datetime, timedelta, timezone
 
 import models
 from database import engine, get_db
+from schema_sync import sync_schema
 
-# Create database tables automatically if they don't exist
-# (existing tables are untouched; the new `incidents` table gets created)
-models.Base.metadata.create_all(bind=engine)
+sync_schema(engine, models.Base.metadata)
 
 app = FastAPI(
     title="Aegisrange Local API",
