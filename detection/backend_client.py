@@ -14,8 +14,14 @@ def _json_default(value):
     )
 
 
+
+
+
 def event_to_payload(event):
-    """Convert a parsed detection event into the backend API format."""
+    """Convert a parsed SSH or Sysmon event into the backend API format."""
+    if not isinstance(event, dict):
+        raise TypeError("event must be a dictionary")
+
     event_type = event.get("event_type")
 
     if event_type:
@@ -25,15 +31,30 @@ def event_to_payload(event):
 
     fields = event.get("fields", {})
 
+    if not isinstance(fields, dict):
+        fields = {}
+
+    source_ip = (
+        event.get("source_ip")
+        or fields.get("SourceIp")
+        or fields.get("SourceIP")
+        or fields.get("SourceAddress")
+    )
+
+    destination_ip = (
+        event.get("destination_ip")
+        or fields.get("DestinationIp")
+        or fields.get("DestinationIP")
+        or fields.get("DestinationAddress")
+    )
+
     return {
-        "source_ip": (
-            event.get("source_ip")
-            or fields.get("SourceIp")
-        ),
-        "destination_ip": fields.get("DestinationIp"),
+        "source_ip": source_ip,
+        "destination_ip": destination_ip,
         "log_type": log_type,
         "raw_data": event,
     }
+
 
 
 def send_event(event, base_url="http://127.0.0.1:8000"):
