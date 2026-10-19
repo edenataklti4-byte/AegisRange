@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 
 import models
 from database import engine, get_db
-from schema_sync import sync_schema
+from schema import sync_schema
 
 sync_schema(engine, models.Base.metadata)
 
