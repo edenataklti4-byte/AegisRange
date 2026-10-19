@@ -1,0 +1,136 @@
+import os
+import sqlite3
+import sys
+import tempfile
+
+PROJECT = os.path.dirname(os.path.abspath(__file__))
+
+
+def check(label, condition, detail=""):
+    print(("PASS  " if condition else "FAIL  ") + label + (f"  -> {detail}" if detail and not condition else ""))
+    if not condition:
+        sys.exit(1)
+
+
+def post_log(client, ip, msg="Failed password for root"):
+    return client.post(
+        "/api/logs",
+        json={"source_ip": ip, "log_type": "auth", "raw_data": {"msg": msg}},
+    )
+
+
+def main():
+    tmp = tempfile.mkdtemp()
+    os.chdir(tmp)              # database.py uses sqlite:///./app.db (relative path)
+    sys.path.insert(0, PROJECT)
+
+    # ---- 1. Build a legacy database (old incidents schema + existing data) ----
+    con = sqlite3.connect("app.db")
+    con.executescript(
+        """
+        CREATE TABLE raw_logs (
+            id INTEGER PRIMARY KEY, source_ip VARCHAR, destination_ip VARCHAR,
+            log_type VARCHAR NOT NULL, raw_data JSON NOT NULL, processed BOOLEAN,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP);
+        CREATE TABLE incidents (
+            id INTEGER PRIMARY KEY, title VARCHAR NOT NULL, description TEXT,
+            severity VARCHAR NOT NULL, timestamp DATETIME NOT NULL);
+        INSERT INTO incidents (title, description, severity, timestamp)
+            VALUES ('Old incident', 'legacy row', 'high', '2026-10-01 10:00:00');
+        INSERT INTO raw_logs (source_ip, log_type, raw_data, processed)
+            VALUES ('1.1.1.1', 'auth', '{"a": 1}', 1);
+        """
+    )
+    con.commit()
+    con.close()
+
+    # ---- 2. Startup (importing main runs sync_schema) ----
+    from fastapi.testclient import TestClient
+    import main
+
+    client = TestClient(main.app)
+    r = client.get("/")
+    check("startup: GET / returns 200", r.status_code == 200, r.text)
+
+    # ---- 3. Migration results ----
+    con = sqlite3.connect("app.db")
+    cols = {row[1] for row in con.execute("PRAGMA table_info(incidents)")}
+    check(
+        "migration: incidents has all model columns",
+        {"source_ip", "log_count", "created_at", "updated_at", "status"} <= cols,
+        cols,
+    )
+    check("migration: legacy 'timestamp' column removed", "timestamp" not in cols)
+    legacy = con.execute("SELECT title, created_at FROM incidents WHERE title='Old incident'").fetchone()
+    check("migration: legacy row preserved with created_at from old timestamp",
+          legacy == ("Old incident", "2026-10-01 10:00:00"), legacy)
+    raw = con.execute("SELECT raw_data FROM raw_logs WHERE source_ip='1.1.1.1'").fetchone()
+    check("migration: raw_logs data untouched", raw is not None and raw[0] == '{"a": 1}', raw)
+    con.close()
+    check("migration: backup file written", any(f.startswith("app.db.bak-") for f in os.listdir(".")))
+
+    # ---- 4. Log ingestion ----
+    r = post_log(client, "10.0.0.5")
+    check("ingest: 1st log returns 201", r.status_code == 201, r.text)
+    check("ingest: response has expected fields",
+          {"id", "log_type", "created_at", "processed"} <= set(r.json()), r.json())
+
+    r = client.post("/api/logs", json={"source_ip": "10.0.0.5"})
+    check("ingest: missing log_type/raw_data returns 422", r.status_code == 422)
+
+    # ---- 5. Correlation: no incident below threshold ----
+    post_log(client, "10.0.0.5")  # 2nd valid log
+    inc = client.get("/api/incidents", params={"source_ip": "10.0.0.5"}).json()
+    check("correlation: no incident after 2 logs", inc == [], inc)
+
+    # ---- 6. Threshold reached ----
+    r = post_log(client, "10.0.0.5")  # 3rd
+    check("correlation: 3rd log still returns 201", r.status_code == 201)
+    inc = client.get("/api/incidents", params={"source_ip": "10.0.0.5"}).json()
+    check("correlation: exactly 1 incident after 3 logs", len(inc) == 1, inc)
+    check("correlation: log_count=3, severity=low, status=open",
+          (inc[0]["log_count"], inc[0]["severity"], inc[0]["status"]) == (3, "low", "open"), inc[0])
+    check("correlation: timestamps present", inc[0]["created_at"] and inc[0]["updated_at"], inc[0])
+    check("correlation: log marked processed", r.json()["processed"] is True)
+
+    # ---- 7. No duplicates, severity escalation ----
+    post_log(client, "10.0.0.5")
+    post_log(client, "10.0.0.5")  # 5 logs
+    inc = client.get("/api/incidents", params={"source_ip": "10.0.0.5"}).json()
+    check("escalation: still 1 incident after 5 logs", len(inc) == 1, inc)
+    check("escalation: severity=medium, log_count=5",
+          (inc[0]["severity"], inc[0]["log_count"]) == ("medium", 5), inc[0])
+
+    for _ in range(5):
+        post_log(client, "10.0.0.5")  # 10 logs
+    inc = client.get("/api/incidents", params={"source_ip": "10.0.0.5"}).json()
+    check("escalation: severity=high, log_count=10, still 1 incident",
+          len(inc) == 1 and (inc[0]["severity"], inc[0]["log_count"]) == ("high", 10), inc)
+
+    # ---- 8. Isolation between IPs ----
+    post_log(client, "10.0.0.9")
+    inc9 = client.get("/api/incidents", params={"source_ip": "10.0.0.9"}).json()
+    check("isolation: other IP with 1 log has no incident", inc9 == [], inc9)
+
+    # ---- 9. List endpoint: filters + paging ----
+    allinc = client.get("/api/incidents").json()
+    check("list: returns legacy + new incident (2 total)", len(allinc) == 2, [i["title"] for i in allinc])
+    check("list: newest first", allinc[0]["source_ip"] == "10.0.0.5", allinc[0])
+    check("filter: severity=high", len(client.get("/api/incidents", params={"severity": "high"}).json()) == 2)
+    check("filter: severity=low returns none",
+          client.get("/api/incidents", params={"severity": "low"}).json() == [])
+    check("paging: limit=1 returns 1", len(client.get("/api/incidents", params={"limit": 1}).json()) == 1)
+    check("paging: limit=0 rejected (422)", client.get("/api/incidents", params={"limit": 0}).status_code == 422)
+
+    # ---- 10. Restart is clean (no second migration) ----
+    before = sorted(f for f in os.listdir(".") if f.startswith("app.db.bak-"))
+    from schema import sync_schema
+    sync_schema(main.engine, main.models.Base.metadata)
+    after = sorted(f for f in os.listdir(".") if f.startswith("app.db.bak-"))
+    check("restart: no extra migration/backup when schema is current", before == after, (before, after))
+
+    print("\nAll checks passed.")
+
+
+if __name__ == "__main__":
+    main()
