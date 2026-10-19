@@ -8,8 +8,6 @@ from sqlalchemy import DateTime, Boolean, Integer, inspect, text
 COLUMN_ALIASES = {
     ("incidents", "created_at"): ["timestamp"],
 }
-
-
 def _now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
@@ -37,7 +35,7 @@ def _value_for(table, col, old_row: dict, new_row: dict):
 def _rebuild_table(engine, table, actual_cols, expected_cols):
     added = sorted(expected_cols - actual_cols)
     dropped = sorted(actual_cols - expected_cols)
-    print(f"[schema_sync] Rebuilding '{table.name}': adding {added or '-'}, removing {dropped or '-'}")
+    print(f"[schema] Rebuilding '{table.name}': adding {added or '-'}, removing {dropped or '-'}")
 
     names = [c.name for c in table.columns]
     quoted = ", ".join(f'"{n}"' for n in names)
@@ -58,13 +56,13 @@ def _rebuild_table(engine, table, actual_cols, expected_cols):
         if new_rows:
             conn.execute(insert_sql, new_rows)  # raw SQL: values copied as-is (no JSON re-encoding)
 
-    print(f"[schema_sync] '{table.name}': migrated {len(old_rows)} row(s)")
+    print(f"[schema] '{table.name}': migrated {len(old_rows)} row(s)")
 
 
 def sync_schema(engine, metadata) -> None:
     if engine.dialect.name != "sqlite":
         metadata.create_all(bind=engine)
-        print("[schema_sync] Non-SQLite database: only create_all() ran. Use Alembic for migrations.")
+        print("[schema] Non-SQLite database: only create_all() ran. Use Alembic for migrations.")
         return
 
     metadata.create_all(bind=engine)  # step 1: missing tables
@@ -84,7 +82,7 @@ def sync_schema(engine, metadata) -> None:
     if db_path and db_path != ":memory:":
         backup = f"{db_path}.bak-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
         shutil.copy2(db_path, backup)
-        print(f"[schema_sync] Backup written to {backup}")
+        print(f"[schema] Backup written to {backup}")
 
     for table, actual, expected in stale:
         _rebuild_table(engine, table, actual, expected)
