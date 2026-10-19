@@ -1,3 +1,4 @@
+from detection.backend_client import send_event
 from detection.utils.alert_formatter import format_alert
 from detection.parsers.ssh_parser import parse_ssh_log
 from detection.rules.ssh_bruteforce import detect_ssh_bruteforce
@@ -31,6 +32,24 @@ def run_detection(log_path="detection/data/auth.log"):
             for event in events
         ),
         "alerts": formatted_alerts,
+    }
+
+def send_events_to_backend(log_path="detection/data/auth.log"):
+    """Parse SSH logs and send each valid event to the backend."""
+    results = []
+
+    with open(log_path, "r") as log_file:
+        for line in log_file:
+            event = parse_ssh_log(line)
+
+            if event:
+                results.append(send_event(event))
+
+    return {
+        "total_events": len(results),
+        "successful": sum(result["success"] for result in results),
+        "failed": sum(not result["success"] for result in results),
+        "results": results,
     }
 
 if __name__ == "__main__":
