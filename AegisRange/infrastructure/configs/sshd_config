@@ -1,0 +1,78 @@
+# ==============================================================================
+# AegisRange - Linux Target OpenSSH Server Configuration
+# Target Host : aegis-linux (Ubuntu Server 22.04 LTS / 10.10.10.20)
+#
+# WARNING & DISCLAIMER:
+# THIS CONFIGURATION FILE IS FOR LAB AND EDUCATIONAL PURPOSES ONLY.
+# IT INTENTIONALLY RELAXES AUTHENTICATION CONTROLS (HIGH MAXAUTHTRIES, PASSWORD
+# AUTHENTICATION, AND ROOT LOGIN) TO ALLOW CONTROLLED BRUTE-FORCE SIMULATIONS
+# (SCENARIO 1) AND PRODUCE EXTENSIVE AUTHENTICATION TELEMETRY IN auth.log.
+# NEVER DEPLOY THIS CONFIGURATION TO PRODUCTION OR INTERNET-EXPOSED HOSTS.
+# ==============================================================================
+
+# Network & Port Binding
+Port 22
+AddressFamily any
+ListenAddress 0.0.0.0
+
+# Host Keys
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_ed25519_key
+
+# ------------------------------------------------------------------------------
+# Telemetry & Auditing Settings
+# ------------------------------------------------------------------------------
+# Syslog facility and logging level:
+# VERBOSE ensures all connection attempts, failed credentials, and key fingerprints
+# are written to /var/log/auth.log for ingestion by the Aegis-Local collector agent.
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# ------------------------------------------------------------------------------
+# Authentication Controls (Intentionally Relaxed for Lab Scenario 1)
+# ------------------------------------------------------------------------------
+# Allow root login over SSH to test administrative brute-force scenarios
+PermitRootLogin yes
+
+# Enforce strict modes for key checking if keys are present
+StrictModes yes
+
+# MaxAuthTries: Set high (100) instead of default (6) so Hydra / brute-force tools
+# can execute multiple rapid authentication attempts per connection session,
+# maximizing log volume and telemetry signal for detector evaluation.
+MaxAuthTries 100
+
+# MaxSessions: Allow concurrent simulation streams
+MaxSessions 10
+
+# LoginGraceTime: Gives simulated brute-force tools 120 seconds to negotiate before disconnect
+LoginGraceTime 120
+
+# Enable standard password authentication for dictionary attacks
+PasswordAuthentication yes
+PermitEmptyPasswords no
+
+# Public key authentication remains enabled if analysts use key-based telemetry
+PubkeyAuthentication yes
+
+# Challenge-response & PAM integration
+KbdInteractiveAuthentication no
+UsePAM yes
+
+# ------------------------------------------------------------------------------
+# Session & Environment Settings
+# ------------------------------------------------------------------------------
+X11Forwarding no
+PrintMotd no
+PrintLastLog yes
+TCPKeepAlive yes
+
+# Banner displayed upon connection
+Banner none
+
+# Subsystem definition for SFTP
+Subsystem sftp /usr/lib/openssh/sftp-server
+
+# Accept lab locale environment variables
+AcceptEnv LANG LC_*
