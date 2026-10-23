@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AegisRange — Executive & Team Guide</title>
+    <!-- Tailwind CSS for sleek modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Mermaid.js for clean visual diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        code, pre { font-family: 'JetBrains Mono', monospace; }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; color: black !important; }
+            .page-break { page-break-before: always; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+
+    <div class="max-w-4xl mx-auto space-y-10">
+
+        <!-- Top Action Bar (Download / Print) -->
+        <div class="no-print flex items-center justify-between bg-slate-900/90 border border-slate-800 p-4 rounded-2xl shadow-xl backdrop-blur sticky top-4 z-50">
+            <div class="flex items-center space-x-3">
+                <span class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 font-bold border border-blue-500/30">
+                    🛡️
+                </span>
+                <div>
+                    <h2 class="text-sm font-semibold text-white">AegisRange Project Guide</h2>
+                    <p class="text-xs text-slate-400">Offline Downloadable Document</p>
+                </div>
+            </div>
+            <div class="flex space-x-3">
+                <button onclick="window.print()" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-xl text-sm transition shadow-lg shadow-blue-500/20 active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    <span>Download as PDF / Print</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Header Hero -->
+        <div class="border-b border-slate-800 pb-8 text-center sm:text-left space-y-3">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold uppercase tracking-wider">
+                Cybersecurity Training Range
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white">
+                AegisRange <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Project Guide</span>
+            </h1>
+            <p class="text-slate-400 text-base sm:text-lg max-w-2xl">
+                Lightweight Attack Detection & Investigation Cyber Range — Everything you need to understand, build, and deliver your project.
+            </p>
+        </div>
+
+        <!-- Core Concept Box -->
+        <div class="bg-gradient-to-br from-blue-950/40 via-slate-900 to-slate-900 border border-blue-500/30 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex items-start space-x-4">
+                <span class="text-3xl">💡</span>
+                <div class="space-y-2">
+                    <h3 class="text-lg font-bold text-white">What is AegisRange in 1 Plain Sentence?</h3>
+                    <p class="text-slate-300 leading-relaxed text-sm sm:text-base">
+                        AegisRange is a <strong class="text-blue-400">safe, isolated virtual practice arena</strong> with 3 virtual computers where you launch simulated cyber attacks, capture the digital evidence, and watch a dashboard reconstruct exactly what happened and when.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: The 3 Virtual Machines -->
+        <div class="space-y-6">
+            <div class="flex items-center space-x-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 font-bold text-sm">1</span>
+                <h2 class="text-2xl font-bold text-white">The Virtual Lab (The 3 Machines)</h2>
+            </div>
+            <p class="text-slate-400 text-sm">
+                Three virtual computers running inside your host PC, connected through an isolated private subnet (<code class="text-blue-300 bg-slate-900 px-2 py-0.5 rounded">10.10.10.0/24</code>):
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Kali -->
+                <div class="bg-slate-900/80 border border-red-500/30 rounded-2xl p-5 space-y-3 relative hover:border-red-500/60 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-red-500/20 text-red-400 border border-red-500/30 rounded-full">Attacker</span>
+                        <span class="text-xs font-mono text-slate-400">10.10.10.10</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">🔴 Kali Linux</h3>
+                    <p class="text-xs text-slate-400">The simulated adversary. Launches Hydra password guessing and hosts the malware payload.</p>
+                </div>
+
+                <!-- Ubuntu -->
+                <div class="bg-slate-900/80 border border-emerald-500/30 rounded-2xl p-5 space-y-3 relative hover:border-emerald-500/60 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">Target 1</span>
+                        <span class="text-xs font-mono text-slate-400">10.10.10.20</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">🟢 Ubuntu Server</h3>
+                    <p class="text-xs text-slate-400">Company server target. Runs SSH and generates authentication logs (<code class="text-emerald-300">/var/log/auth.log</code>).</p>
+                </div>
+
+                <!-- Windows -->
+                <div class="bg-slate-900/80 border border-sky-500/30 rounded-2xl p-5 space-y-3 relative hover:border-sky-500/60 transition">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-semibold px-2.5 py-1 bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-full">Target 2</span>
+                        <span class="text-xs font-mono text-slate-400">10.10.10.30</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white">🔵 Windows 10</h3>
+                    <p class="text-xs text-slate-400">Workstation PC target. Telemetry generated with Sysmon (Process, File, Registry, Network).</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Team Roles & Ownership -->
+        <div class="space-y-6">
+            <div class="flex items-center space-x-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 font-bold text-sm">2</span>
+                <h2 class="text-2xl font-bold text-white">Team Roles & Who Delivers What</h2>
+            </div>
+            <p class="text-slate-400 text-sm">
+                Each member owns one link in the pipeline. Note that <strong class="text-emerald-400">Member 5 builds the Streamlit dashboard</strong>, while <strong class="text-blue-400">Member 1 builds the lab & attacks</strong>.
+            </p>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-800 shadow-xl">
+                <table class="w-full text-left text-sm text-slate-300">
+                    <thead class="bg-slate-900 text-xs uppercase text-slate-400 border-b border-slate-800">
+                        <tr>
+                            <th class="py-4 px-6">Member</th>
+                            <th class="py-4 px-6">Component</th>
+                            <th class="py-4 px-6">Main Output</th>
+                            <th class="py-4 px-6">Delivers Website?</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 bg-slate-950/60">
+                        <tr class="bg-blue-950/20 font-medium">
+                            <td class="py-4 px-6 text-blue-400 font-bold flex items-center space-x-2">
+                                <span>👑 Member 1 (You)</span>
+                            </td>
+                            <td class="py-4 px-6 text-white font-semibold">Architecture + Red Team Lead</td>
+                            <td class="py-4 px-6">Lab environment (`Vagrantfile`), network, attack scripts, integration</td>
+                            <td class="py-4 px-6"><span class="px-2.5 py-1 bg-slate-800 text-slate-400 rounded-md text-xs font-bold">NO (Lab & Attacks)</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-6 font-semibold text-red-400">Member 2</td>
+                            <td class="py-4 px-6">Red Team</td>
+                            <td class="py-4 px-6">Executes attack scenarios & documents raw evidence</td>
+                            <td class="py-4 px-6"><span class="px-2.5 py-1 bg-slate-800 text-slate-400 rounded-md text-xs">NO</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-6 font-semibold text-yellow-400">Member 3</td>
+                            <td class="py-4 px-6">Detection</td>
+                            <td class="py-4 px-6">Log collectors, parsers & initial detection rules</td>
+                            <td class="py-4 px-6"><span class="px-2.5 py-1 bg-slate-800 text-slate-400 rounded-md text-xs">NO</span></td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-6 font-semibold text-purple-400">Member 4</td>
+                            <td class="py-4 px-6">Backend / Correlation</td>
+                            <td class="py-4 px-6">SQLite <code>app.db</code>, correlation engine, <code>main.py</code> API (<code>POST /api/logs</code>, <code>GET /api/incidents</code>)</td>
+                            <td class="py-4 px-6"><span class="px-2.5 py-1 bg-slate-800 text-slate-400 rounded-md text-xs">NO (Backend API)</span></td>
+                        </tr>
+                        <tr class="bg-emerald-950/20">
+                            <td class="py-4 px-6 font-bold text-emerald-400">Member 5</td>
+                            <td class="py-4 px-6 text-white font-semibold">Frontend</td>
+                            <td class="py-4 px-6"><b>Streamlit</b> dashboard &amp; log timeline UI (<code>dashboard.py</code> reads <code>app.db</code> directly)</td>
+                            <td class="py-4 px-6"><span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-md text-xs font-bold">YES! (Streamlit Dashboard)</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 3: The 2 Attack Scenarios -->
+        <div class="space-y-6">
+            <div class="flex items-center space-x-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-red-500/20 text-red-400 font-bold text-sm">3</span>
+                <h2 class="text-2xl font-bold text-white">The 2 Attack Scenarios</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Scenario 1 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center space-x-2 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                        <span>Linux Target</span>
+                        <span>•</span>
+                        <span>MITRE T1110.001</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Scenario 1: SSH Brute-Force</h3>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">1.</span>
+                            <span>Kali scans Linux target port 22 with Nmap.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">2.</span>
+                            <span>Hydra tests ~25 passwords rapidly, generating failed auth logs.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">3.</span>
+                            <span>Succeeds with <code class="text-amber-300">labpass123</code>.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">4.</span>
+                            <span>Runs post-login commands: <code class="text-amber-300">whoami</code>, <code class="text-amber-300">cat /etc/passwd</code>.</span>
+                        </li>
+                    </ul>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
+                        Target Evidence: /var/log/auth.log
+                    </div>
+                </div>
+
+                <!-- Scenario 2 -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center space-x-2 text-sky-400 text-xs font-bold uppercase tracking-wider">
+                        <span>Windows Target</span>
+                        <span>•</span>
+                        <span>MITRE T1059.001 / T1105</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Scenario 2: Malware Dropper</h3>
+                    <ul class="space-y-2 text-sm text-slate-300">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">1.</span>
+                            <span>PowerShell downloads payload from Kali HTTP server.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">2.</span>
+                            <span>Saves file into <code class="text-sky-300">C:\Users\Public\payload.exe</code>.</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">3.</span>
+                            <span>Executes payload and adds a Registry Run key (persistence).</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-400 font-bold">4.</span>
+                            <span>Initiates TCP callback to Kali on port 4444.</span>
+                        </li>
+                    </ul>
+                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
+                        Target Evidence: Sysmon EID 1, 3, 11, 13
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: 4-Week Delivery Roadmap -->
+        <div class="space-y-6">
+            <div class="flex items-center space-x-3">
+                <span class="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-sm">4</span>
+                <h2 class="text-2xl font-bold text-white">Step-by-Step Delivery Roadmap</h2>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2">
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-wider">Week 1</span>
+                    <h4 class="font-bold text-white">Lab & Arch</h4>
+                    <p class="text-xs text-slate-400">Member 1 spins up the 3 VMs using Vagrant and validates network ping connectivity.</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2">
+                    <span class="text-xs font-bold text-red-400 uppercase tracking-wider">Week 2</span>
+                    <h4 class="font-bold text-white">Fire Attacks</h4>
+                    <p class="text-xs text-slate-400">Member 2 executes the 2 attack scripts, confirms raw evidence appears, and saves sample logs.</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2">
+                    <span class="text-xs font-bold text-yellow-400 uppercase tracking-wider">Week 3</span>
+                    <h4 class="font-bold text-white">Detect & Correlate</h4>
+                    <p class="text-xs text-slate-400">Member 3 collectors <code>POST /api/logs</code> to Member 4's <code>main.py</code>; 3+ logs from one source IP in 5 min raise an incident.</p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-2">
+                    <span class="text-xs font-bold text-emerald-400 uppercase tracking-wider">Week 4</span>
+                    <h4 class="font-bold text-white">Streamlit Demo</h4>
+                    <p class="text-xs text-slate-400">Member 5 launches Streamlit on <code>app.db</code>. You run an attack live $\rightarrow$ incident appears on the dashboard!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center pt-8 border-t border-slate-800 text-xs text-slate-500 space-y-1">
+            <p>AegisRange Cyber Range Project • Created for Team Member 1 (Architecture & Red Team Lead)</p>
+            <p>All project scripts and files are saved locally in <code class="text-slate-400">d:\Fres proj\AegisRange\</code></p>
+        </div>
+
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+</body>
+</html>
