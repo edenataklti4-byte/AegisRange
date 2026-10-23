@@ -1,0 +1,138 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+# ==============================================================================
+# AegisRange - Cybersecurity Training Platform
+# Virtual Infrastructure Configuration (Vagrantfile)
+#
+# LAB / EDUCATIONAL USE ONLY:
+# This file provisions an isolated multi-node cyber range designed exclusively
+# for detection engineering, SOC analyst training, and controlled security simulations.
+# All virtual machines operate within a strictly isolated VirtualBox host-only
+# network (10.10.10.0/24).
+#
+# Network Topology:
+#   - 10.10.10.10 : aegis-kali    (Attacker - Kali Linux Rolling)
+#   - 10.10.10.20 : aegis-linux   (Target 1 - Ubuntu Server 22.04 LTS)
+#   - 10.10.10.30 : aegis-windows (Target 2 - Windows 10 Enterprise Eval)
+# ==============================================================================
+
+Vagrant.configure("2") do |config|
+  # Disable automated box update checks to ensure reproducible lab builds
+  config.vm.box_check_update = false
+
+  # ============================================================================
+  # 1. Attacker Node: aegis-kali
+  # ============================================================================
+  # Operating System : Kali Linux Rolling (64-bit)
+  # Role             : Simulated adversary platform executing reconnaissance,
+  #                    brute-force attacks (Hydra), and payload staging.
+  # Subnet IP        : 10.10.10.10
+  # Hardware Spec    : 2048 MB RAM, 2 vCPUs
+  # ============================================================================
+  config.vm.define "aegis-kali" do |kali|
+    kali.vm.box = "kalilinux/rolling"
+    kali.vm.hostname = "aegis-kali"
+
+    # Host-only isolated private network interface
+    kali.vm.network "private_network", ip: "10.10.10.10", netmask: "255.255.255.0"
+
+    # Security Isolation: Disable default Vagrant synced folders to avoid host bleed
+    kali.vm.synced_folder ".", "/vagrant", disabled: true
+
+    # VirtualBox hypervisor configuration
+    kali.vm.provider "virtualbox" do |vb|
+      vb.name = "AegisRange-Kali"
+      vb.memory = 2048
+      vb.cpus = 2
+      vb.gui = false # Headless execution mode
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--audio", "none"]
+    end
+
+    # Provision attacker tools and attack scenario directories
+    kali.vm.provision "shell", path: "scripts/provision-kali.sh"
+  end
+
+  # ============================================================================
+  # 2. Linux Target Node: aegis-linux
+  # ============================================================================
+  # Operating System : Ubuntu Server 22.04 LTS (Jammy Jellyfish 64-bit)
+  # Role             : Target system for Scenario 1 (SSH / FTP brute-force simulation).
+  #                    Instruments auditd, auth.log, and rsyslog for telemetry.
+  # Subnet IP        : 10.10.10.20
+  # Hardware Spec    : 2048 MB RAM, 1 vCPU
+  # ============================================================================
+  config.vm.define "aegis-linux" do |linux|
+    linux.vm.box = "ubuntu/jammy64"
+    linux.vm.hostname = "aegis-linux"
+
+    # Host-only isolated private network interface
+    linux.vm.network "private_network", ip: "10.10.10.20", netmask: "255.255.255.0"
+
+    # Security Isolation: Disable default Vagrant synced folders to avoid host bleed
+    linux.vm.synced_folder ".", "/vagrant", disabled: true
+
+    # Stage vulnerable sshd_config for provisioning script
+    linux.vm.provision "file", source: "configs/sshd_config", destination: "/tmp/sshd_config"
+
+    # VirtualBox hypervisor configuration
+    linux.vm.provider "virtualbox" do |vb|
+      vb.name = "AegisRange-Ubuntu"
+      vb.memory = 2048
+      vb.cpus = 1
+      vb.gui = false # Headless execution mode
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--audio", "none"]
+    end
+
+    # Provision target services, accounts, auditd, and firewall rules
+    linux.vm.provision "shell", path: "scripts/provision-linux.sh"
+  end
+
+  # ============================================================================
+  # 3. Windows Target Node: aegis-windows
+  # ============================================================================
+  # Operating System : Windows 10 Enterprise Evaluation (64-bit)
+  # Role             : Target system for Scenario 2 (Malicious process execution,
+  #                    persistence, registry changes, and Sysmon event generation).
+  # Subnet IP        : 10.10.10.30
+  # Hardware Spec    : 4096 MB RAM, 2 vCPUs
+  # ============================================================================
+  config.vm.define "aegis-windows" do |win|
+    win.vm.box = "gusztavvargadr/windows-10"
+    win.vm.hostname = "aegis-windows"
+
+    # WinRM communication settings for Windows management
+    win.vm.communicator = "winrm"
+    win.winrm.username = "vagrant"
+    win.winrm.password = "vagrant"
+    win.winrm.retry_limit = 30
+    win.winrm.retry_delay = 10
+
+    # Host-only isolated private network interface
+    win.vm.network "private_network", ip: "10.10.10.30", netmask: "255.255.255.0"
+
+    # Security Isolation: Disable default Vagrant synced folders to avoid host bleed
+    win.vm.synced_folder ".", "/vagrant", disabled: true
+
+    # Prepare C:\Tools directory on Windows guest before uploading Sysmon configuration
+    win.vm.provision "shell", inline: "if (!(Test-Path 'C:\\Tools')) { New-Item -ItemType Directory -Path 'C:\\Tools' -Force }"
+
+    # Stage Sysmon telemetry configuration file
+    win.vm.provision "file", source: "configs/sysmon-config.xml", destination: "C:\\Tools\\sysmon-config.xml"
+
+    # VirtualBox hypervisor configuration
+    win.vm.provider "virtualbox" do |vb|
+      vb.name = "AegisRange-Windows"
+      vb.memory = 4096
+      vb.cpus = 2
+      vb.gui = false # Headless execution mode
+      vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      vb.customize ["modifyvm", :id, "--ioapic", "on"]
+      vb.customize ["modifyvm", :id, "--audio", "none"]
+    end
+
+    # Provision Windows audit policies, PowerShell logging, Sysmon, and test accounts
+    win.vm.provision "shell", path: "scripts/provision-windows.ps1"
+  end
+end

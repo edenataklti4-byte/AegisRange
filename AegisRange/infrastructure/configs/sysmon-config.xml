@@ -1,0 +1,163 @@
+<!--
+  ==============================================================================
+  AegisRange - Endpoint Detection Sysmon Telemetry Configuration
+  Target Host : aegis-windows (10.10.10.30)
+  
+  LAB / EDUCATIONAL USE ONLY:
+  This configuration is tailored for cyber range threat detection training.
+  It instruments endpoints to detect:
+    - Suspicious process execution & command-line arguments (Scenario 2)
+    - Adversary command & control / network callbacks to Kali (10.10.10.10)
+    - DLL injection & suspicious image loading
+    - Staging in public / temporary directories
+    - Persistence via Registry Run keys
+    - Alternate Data Streams (ADS)
+    - DNS resolution anomalies
+  ==============================================================================
+-->
+<Sysmon schemaversion="4.90">
+  <!-- Hash algorithms to calculate for process creation and driver loading -->
+  <HashAlgorithms>MD5,SHA256,IMPHASH</HashAlgorithms>
+  <CheckRevocation/>
+
+  <EventFiltering>
+
+    <!-- ======================================================================
+         EVENT ID 1: Process Creation
+         Instruments every process launch including full command line arguments,
+         parent process hierarchy, user context, and binary hashes.
+         ====================================================================== -->
+    <RuleGroup name="ProcessCreation" groupRelation="or">
+      <ProcessCreate onmatch="exclude">
+        <!-- Filter minimal hypervisor and OS background noise while preserving attack artifacts -->
+        <Image condition="is">C:\Windows\System32\audiodg.exe</Image>
+        <Image condition="is">C:\Windows\System32\conhost.exe</Image>
+        <Image condition="is">C:\Windows\System32\wbem\WmiPrvSE.exe</Image>
+        <CommandLine condition="contains">C:\Windows\System32\cleanmgr.exe /autoclean</CommandLine>
+      </ProcessCreate>
+    </RuleGroup>
+
+    <!-- ======================================================================
+         EVENT ID 3: Network Connection
+         Captures outbound network connections initiated by endpoint processes.
+         Prioritizes traffic to the Kali attacker VM (10.10.10.10) and internal range.
+         ====================================================================== -->
+    <RuleGroup name="NetworkConnection" groupRelation="or">
+      <NetworkConnect onmatch="include">
+        <!-- Telemetry: Outbound callbacks to Kali attacker -->
+        <DestinationIp condition="is">10.10.10.10</DestinationIp>
+        
+        <!-- Telemetry: Range-wide lateral movement across the 10.10.10.0/24 subnet -->
+        <DestinationIp condition="begin with">10.10.10.</DestinationIp>
+
+        <!-- Common malicious destination ports (C2, Reverse Shells, Web, SMB) -->
+        <DestinationPort condition="is">4444</DestinationPort>
+        <DestinationPort condition="is">1337</DestinationPort>
+        <DestinationPort condition="is">8000</DestinationPort>
+        <DestinationPort condition="is">8080</DestinationPort>
+        <DestinationPort condition="is">9001</DestinationPort>
+        <DestinationPort condition="is">22</DestinationPort>
+        <DestinationPort condition="is">445</DestinationPort>
+      </NetworkConnect>
+    </RuleGroup>
+
+    <!-- ======================================================================
+         EVENT ID 7: Image Loaded (DLL Module Telemetry)
+         Detects dynamic library injection, reflectively loaded assemblies,
+         and unsigned / suspicious binaries loading from untrusted paths.
+         ====================================================================== -->
+    <RuleGroup name="ImageLoaded" groupRelation="or">
+      <ImageLoad onmatch="include">
+        <!-- DLLs loaded from world-writable or user staging directories -->
+        <ImageLoaded condition="begin with">C:\Users\Public</ImageLoaded>
+        <ImageLoaded condition="contains">\AppData\Local\Temp\</ImageLoaded>
+        <ImageLoaded condition="begin with">C:\Windows\Temp</ImageLoaded>
+        <ImageLoaded condition="begin with">C:\Tools</ImageLoaded>
+        <ImageLoaded condition="begin with">C:\ProgramData</ImageLoaded>
+
+        <!-- Common LOLBAS injection targets and security providers -->
+        <ImageLoaded condition="end with">\amsi.dll</ImageLoaded>
+        <ImageLoaded condition="end with">\clr.dll</ImageLoaded>
+      </ImageLoad>
+    </RuleGroup>
+
+    <!-- ======================================================================
+         EVENT ID 11: File Creation
+         Captures file write operations in staging folders frequently abused
+         by malicious scripts and downloaded payloads.
+         ====================================================================== -->
+    <RuleGroup name="FileCreation" groupRelation="or">
+      <FileCreate onmatch="include">
+        <!-- Target directory: Public user staging (Scenario 2 drop location) -->
+        <TargetFilename condition="begin with">C:\Users\Public</TargetFilename>
+        <TargetFilename condition="begin with">C:\Windows\Temp</TargetFilename>
+        <TargetFilename condition="contains">\AppData\Local\Temp\</TargetFilename>
+        <TargetFilename condition="begin with">C:\Tools</TargetFilename>
+
+        <!-- Dangerous executable and script file extension drops -->
+        <TargetFilename condition="end with">.exe</TargetFilename>
+        <TargetFilename condition="end with">.bat</TargetFilename>
+        <TargetFilename condition="end with">.cmd</TargetFilename>
+        <TargetFilename condition="end with">.ps1</TargetFilename>
+        <TargetFilename condition="end with">.vbs</TargetFilename>
+        <TargetFilename condition="end with">.dll</TargetFilename>
+        <TargetFilename condition="end with">.hta</TargetFilename>
+      </FileCreate>
+    </RuleGroup>
+
+    <!-- ======================================================================
+         EVENT ID 13: Registry Value Set
+         Captures registry modifications commonly used for persistence (MITRE T1547.001)
+         and security control degradation.
+         ====================================================================== -->
+    <RuleGroup name="RegistryPersistence" groupRelation="or">
+      <RegistryEvent onmatch="include">
+        <!-- Autostart Run & RunOnce keys -->
+        <TargetObject condition="contains">\CurrentVersion\Run\</TargetObject>
+        <TargetObject condition="contains">\CurrentVersion\RunOnce\</TargetObject>
+        <TargetObject condition="contains">\CurrentVersion\RunServices\</TargetObject>
+
+        <!-- Service installation & modifications -->
+        <TargetObject condition="contains">\System\CurrentControlSet\Services\</TargetObject>
+
+        <!-- Winlogon persistence -->
+        <TargetObject condition="contains">\Microsoft\Windows NT\CurrentVersion\Winlogon\</TargetObject>
+
+        <!-- Image File Execution Options (IFEO) debugger hijacks -->
+        <TargetObject condition="contains">\Image File Execution Options\</TargetObject>
+
+        <!-- Security degradation / Defender policy tampering -->
+        <TargetObject condition="contains">\Policies\Microsoft\Windows Defender</TargetObject>
+        <TargetObject condition="contains">\Policies\Microsoft\Windows\PowerShell</TargetObject>
+      </RegistryEvent>
+    </RuleGroup>
+
+    <!-- ======================================================================
+         EVENT ID 15: FileCreateStreamHash (Alternate Data Streams)
+         Identifies Zone.Identifier markers on downloaded payloads and hidden ADS streams.
+         ====================================================================== -->
+    <RuleGroup name="AlternateDataStreams" groupRelation="or">
+      <FileCreateStreamHash onmatch="include">
+        <TargetFilename condition="contains">Zone.Identifier</TargetFilename>
+        <TargetFilename condition="begin with">C:\Users\</TargetFilename>
+        <TargetFilename condition="begin with">C:\Windows\Temp\</TargetFilename>
+      </FileCreateStreamHash>
+    </RuleGroup>
+
+    <!-- ======================================================================
+         EVENT ID 22: DNS Query
+         Tracks DNS queries executed by local processes for reconnaissance,
+         C2 domains, or tunneling detection.
+         ====================================================================== -->
+    <RuleGroup name="DnsQuery" groupRelation="or">
+      <DnsQuery onmatch="exclude">
+        <!-- Filter standard internal discovery and local domain queries -->
+        <QueryName condition="end with">.local</QueryName>
+        <QueryName condition="end with">.lan</QueryName>
+        <QueryName condition="end with">.arpa</QueryName>
+        <QueryName condition="is">localhost</QueryName>
+      </DnsQuery>
+    </RuleGroup>
+
+  </EventFiltering>
+</Sysmon>
