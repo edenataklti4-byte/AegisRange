@@ -13,8 +13,10 @@ AegisRange is a controlled, self-hosted cybersecurity training platform that sim
 Backend: FastAPI, SQLAlchemy, SQLite
 Dashboard: Streamlit, Pandas
 Attack environment: isolated virtual network with Linux, Windows, and an attacker machine
-##project demo
+
+## Project Demo
 https://youtu.be/5f_OvplOO8c?si=ScqVVdOBExa_RbDF
+
 ## Team Members
 
 | Name | CTC ID |
