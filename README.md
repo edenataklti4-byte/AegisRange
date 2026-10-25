@@ -14,3 +14,13 @@ Backend: FastAPI, SQLAlchemy, SQLite
 Dashboard: Streamlit, Pandas
 Attack environment: isolated virtual network with Linux, Windows, and an attacker machine
 
+## Team Members
+
+| Name | CTC ID |
+|------|--------|
+| Amiel Abebe | CTC-7183-26 |
+| Frehiwot Kiros | CTC-3254-26 |
+| Eden Ataklti | CTC-1017-26 |
+| Seblewerk Hailemariam | CTC-1187-26 |
+| Eyeruasalem Worku | CTC-3078-26 |
+
