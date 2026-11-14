@@ -94,3 +94,7 @@ Attack, evidence generation, detection, correlation, and investigation.
 The project provides a foundation for learning how security incidents can be detected and analyzed in a controlled laboratory environment.
 
 Our future improvements include severity scoring, MITRE ATT&CK technique mapping, and virtual-machine snapshot restoration.
+
+here is ny induvidual video link
+
+https://youtu.be/C4JdNF6SzqU?si=JQEPAomaKrE67jx2
