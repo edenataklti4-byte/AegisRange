@@ -3,7 +3,7 @@ AegisRange: Lightweight Attack Detection & Investigation Cyber Range
 
  Member 1 – Architecture + Red Team Lead
 
-Hello everyone. My project is called AegisRange: Lightweight Attack Detection and Investigation Cyber Range.
+Hello everyone. our project is called AegisRange: Lightweight Attack Detection and Investigation Cyber Range.
 
 AegisRange is a self-hosted cybersecurity training platform designed to demonstrate how cyberattacks can be simulated in a controlled environment, how the resulting evidence can be collected, and how suspicious activities can be detected and investigated.
 
